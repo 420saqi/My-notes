@@ -91,7 +91,15 @@ class _RegisterState extends State<Register> {
                       child: const Text(
                         'Register',
                         style: TextStyle(fontSize: 20),
-                      ))
+                      )),
+                  TextButton(onPressed: (){
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/login/',
+                            (route) => false
+                    );
+                  },
+                      child: const Text('Already a user!. Login Here',
+                        style: TextStyle(fontSize: 20),))
                 ],
               );
             default :
