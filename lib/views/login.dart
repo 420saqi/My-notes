@@ -71,7 +71,7 @@ class _LoginState extends State<Login> {
                           UserCredential userCredential =  await FirebaseAuth.instance
                               .signInWithEmailAndPassword(
                                   email: email, password: password);
-                          print(userCredential.user!.email);
+                          print(userCredential.user);
                         }on FirebaseAuthException catch (e)
                         {
                           if(e.code=='invalid-email')
@@ -95,7 +95,15 @@ class _LoginState extends State<Login> {
                       child: const Text(
                         'Login',
                         style: TextStyle(fontSize: 20),
-                      ))
+                      )),
+                  TextButton(onPressed: (){
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/register/',
+                            (route) => false
+                    );
+                  },
+                      child: const Text('Not Registered Yet!. Register Here',
+                        style: TextStyle(fontSize: 20),))
                 ],
               );
             default :
