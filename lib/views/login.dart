@@ -71,7 +71,16 @@ class _LoginState extends State<Login> {
                           UserCredential userCredential =  await FirebaseAuth.instance
                               .signInWithEmailAndPassword(
                                   email: email, password: password);
-                          print(userCredential.user);
+                          print(userCredential.user!.emailVerified);
+                          print(userCredential.user!.email);
+                         final currentContext = context;
+                         Future.delayed(Duration.zero, () {
+                          Navigator.of(currentContext).pushNamedAndRemoveUntil(
+                               '/notesView/',
+                               (route) => false);
+                         });
+
+
                         }on FirebaseAuthException catch (e)
                         {
                           if(e.code=='invalid-email')
