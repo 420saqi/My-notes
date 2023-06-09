@@ -1,34 +1,30 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nots/constants/routes.dart';
 
+import '../utilities/show_error_dialog.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
-
   @override
   State<Login> createState() => _LoginState();
 }
-
 class _LoginState extends State<Login> {
-
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
-
   @override
   void initState() {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     super.initState();
   }
-
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,32 +69,48 @@ class _LoginState extends State<Login> {
                                   email: email, password: password);
                           print(userCredential.user!.emailVerified);
                           print(userCredential.user!.email);
-                         final currentContext = context;
-                         Future.delayed(Duration.zero, () {
-                          Navigator.of(currentContext).pushNamedAndRemoveUntil(
-                               '/notesView/',
-                               (route) => false);
-                         });
+                          if(userCredential.user!.emailVerified)
+                            {
+                              final currentContext = context;
+                              Future.delayed(Duration.zero, () {
+                                Navigator.of(currentContext).pushNamedAndRemoveUntil(
+                                    notesRoute,
+                                        (route) => false);
+                              });
+                            }
+                         else
+                           {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                   verifyEmailRoute,
+                                   (route) => false);
+                           }
 
 
-                        }on FirebaseAuthException catch (e)
+                        } on FirebaseAuthException catch (e)
                         {
                           if(e.code=='invalid-email')
                             {
-                              print('Invalid email');
+                              // print('Invalid email');
+                              showErrorDialog(context, 'Invalid Email');
                             }
                           else if(e.code=='wrong-password')
                             {
-                              print('wrong password');
+                              // print('wrong password');
+                              showErrorDialog(context, 'Wrong Password');
                             }
                           else if(e.code=='user-not-found')
                             {
-                              print('user not found');
+                              // print('user not found');
+                              showErrorDialog(context, 'User Not Found');
                             }
-                          else
+                          else if(e.code == 'unknown')
                             {
-                              print(e.code);
+                              showErrorDialog(context, 'Invalid Email Or Password');
+                              // print('FirebaseAuth Exception In Login file ${e.code}');
                             }
+                        }catch(e){
+                          showErrorDialog(context, 'Error : ${e.toString()}');
+                          print(e.toString());
                         }
                       },
                       child: const Text(
@@ -107,7 +119,7 @@ class _LoginState extends State<Login> {
                       )),
                   TextButton(onPressed: (){
                     Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/register/',
+                        registerRoute ,
                             (route) => false
                     );
                   },
@@ -118,7 +130,6 @@ class _LoginState extends State<Login> {
             default :
               return const Text('Loading');
           }
-
         },
       ) ,//
     );

@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:nots/constants/routes.dart';
+import 'package:nots/utilities/show_error_dialog.dart';
 
 
 class Register extends StatefulWidget {
@@ -72,19 +74,31 @@ class _RegisterState extends State<Register> {
                           await FirebaseAuth.instance
                               .createUserWithEmailAndPassword(
                                   email: email, password: password);
+                          final user= FirebaseAuth.instance.currentUser;
+                          await user!.sendEmailVerification();
+                         await Navigator.of(context).pushNamed(verifyEmailRoute);
                         } on FirebaseAuthException catch(e)
                         {
                           if(e.code == 'email-already-in-use')
                             {
-                              print('email already in use');
+                              // print('email already in use');
+                              showErrorDialog(context, 'Email Already in Use');
                             }
                           else if(e.code =='invalid-email')
                             {
-                              print('Invalid email ');
+                              // print('Invalid email ');
+                              showErrorDialog(context, 'Invalid Email');
                             }
                           else if(e.code== 'weak-password'){
-                            print('weak password');
+                            // print('weak password');
+                            showErrorDialog(context, 'Weak Password');
                           }
+                          else if(e.code== 'unknown'){
+                            showErrorDialog(context, 'Invalid Credentials');
+                          }
+                        }catch(e)
+                        {
+                          showErrorDialog(context, 'Error : ${e.toString()}');
                         }
 
                       },
@@ -93,10 +107,8 @@ class _RegisterState extends State<Register> {
                         style: TextStyle(fontSize: 20),
                       )),
                   TextButton(onPressed: (){
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/login/',
-                            (route) => false
-                    );
+                    final user = FirebaseAuth.instance.currentUser;
+                    Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
                   },
                       child: const Text('Already a user!. Login Here',
                         style: TextStyle(fontSize: 20),))
