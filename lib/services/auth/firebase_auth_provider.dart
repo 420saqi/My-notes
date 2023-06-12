@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart'
     show FirebaseAuth, FirebaseAuthException;
+import 'package:firebase_core/firebase_core.dart';
 import 'auth_user.dart';
 import 'auth_exceptions.dart';
 import 'auth_provider.dart';
@@ -96,5 +97,17 @@ class FirebaseAuthProvider implements AuthProvider {
     } else {
       throw UserNotFoundAuthException();
     }
+  }
+
+  @override
+  Future<void> initializeFirebase() async{
+    await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: 'AIzaSyDT8DyNShKWDdYq37A6DvJ2oW9tPoeRO38',
+            appId: '1:58316628830:android:f80ef5f9ecc1ccf26c65cf',
+            messagingSenderId: '58316628830',
+            projectId: 'nots-60f4c'
+        )
+    );
   }
 }

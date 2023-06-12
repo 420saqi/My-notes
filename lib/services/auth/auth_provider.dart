@@ -12,5 +12,7 @@ Future<void> logout() ;
 
 Future<AuthUser> createUser({required String email, required String password,});
 
+Future<void> initializeFirebase();
+
 Future<void> sendEmailVerification();
 }

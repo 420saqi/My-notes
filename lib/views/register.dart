@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:nots/constants/routes.dart';
+import 'package:nots/services/auth/auth_service.dart';
 import 'package:nots/utilities/show_error_dialog.dart';
 
+import '../services/auth/auth_exceptions.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,7 +13,6 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
 
@@ -38,16 +37,10 @@ class _RegisterState extends State<Register> {
         backgroundColor: Colors.blue,
         title: const Text('Register'),
       ),
-      body:FutureBuilder(
-        future: Firebase.initializeApp(options: const FirebaseOptions(
-            apiKey: 'AIzaSyDT8DyNShKWDdYq37A6DvJ2oW9tPoeRO38',
-            appId: '1:58316628830:android:f80ef5f9ecc1ccf26c65cf',
-            messagingSenderId: '58316628830',
-            projectId: 'nots-60f4c'
-        ),),
-        builder: (BuildContext context, AsyncSnapshot<FirebaseApp> snapshot)
-        {
-          switch(snapshot.connectionState){
+      body: FutureBuilder(
+        future: AuthService.firebase().initializeFirebase(),
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          switch (snapshot.connectionState) {
             case ConnectionState.done:
               return Column(
                 children: [
@@ -70,56 +63,47 @@ class _RegisterState extends State<Register> {
                         final email = _emailController.text;
                         final password = _passwordController.text;
 
-                      try  {
-                          await FirebaseAuth.instance
-                              .createUserWithEmailAndPassword(
-                                  email: email, password: password);
-                          final user= FirebaseAuth.instance.currentUser;
-                          await user!.sendEmailVerification();
-                         await Navigator.of(context).pushNamed(verifyEmailRoute);
-                        } on FirebaseAuthException catch(e)
-                        {
-                          if(e.code == 'email-already-in-use')
-                            {
-                              // print('email already in use');
-                              showErrorDialog(context, 'Email Already in Use');
-                            }
-                          else if(e.code =='invalid-email')
-                            {
-                              // print('Invalid email ');
-                              showErrorDialog(context, 'Invalid Email');
-                            }
-                          else if(e.code== 'weak-password'){
-                            // print('weak password');
-                            showErrorDialog(context, 'Weak Password');
-                          }
-                          else if(e.code== 'unknown'){
-                            showErrorDialog(context, 'Invalid Credentials');
-                          }
-                        }catch(e)
-                        {
-                          showErrorDialog(context, 'Error : ${e.toString()}');
-                        }
+                        try {
+                          await AuthService.firebase()
+                              .createUser(email: email, password: password);
+                          await AuthService.firebase().sendEmailVerification();
+                        Future.delayed(Duration.zero, (){
+                           Navigator.of(context)
+                              .pushNamed(verifyEmailRoute);
+                        });
 
+                        } on EmailALreadyInUseAuthException {
+                          showErrorDialog(context, 'Email Already in Use');
+                        } on InvalidEmailAuthException {
+                          showErrorDialog(context, 'Invalid Email');
+                        } on WeakPasswordAuthException {
+                          showErrorDialog(context, 'Weak Password');
+                        } on GenericException {
+                          showErrorDialog(context, 'Authentication Error');
+                        }
                       },
                       child: const Text(
                         'Register',
                         style: TextStyle(fontSize: 20),
                       )),
-                  TextButton(onPressed: (){
-                    final user = FirebaseAuth.instance.currentUser;
-                    Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
-                  },
-                      child: const Text('Already a user!. Login Here',
-                        style: TextStyle(fontSize: 20),))
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          loginRoute,
+                          (route) => false,
+                        );
+                      },
+                      child: const Text(
+                        'Already a user!. Login Here',
+                        style: TextStyle(fontSize: 20),
+                      ))
                 ],
               );
-            default :
-              return const Text('Loading');
+            default:
+              return const CircularProgressIndicator();
           }
-
         },
-      ) ,//
+      ), //
     );
   }
 }
