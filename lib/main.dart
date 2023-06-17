@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nots/services/auth/auth_service.dart';
 import 'package:nots/views/login.dart';
+import 'package:nots/views/notes/new_notes_view.dart';
 import 'package:nots/views/notesView.dart';
 import 'package:nots/views/register.dart';
 import 'package:nots/views/verifyEmail.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         loginRoute : (context) =>      const Login(),
         notesRoute : (context)  =>     const NotesView(),
         verifyEmailRoute : (context) => const VerifyEmail(),
+        NewNoteRoute : (context) => const NewNotesView(),
       },
     );
   }
